@@ -1,0 +1,71 @@
+/* =====================================================================
+   ЕКРАН «КОЛОДИ» — список колод зі статистикою та кнопки під ним.
+   ===================================================================== */
+
+.deck-list { display: flex; flex-direction: column; gap: 10px; }
+
+.deck-item {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.deck-item:active { background: var(--bg-elevated); }
+
+.deck-info { flex: 1; min-width: 0; }
+.deck-name {
+  font-weight: 700;
+  font-size: 1.02rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.deck-stats {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-top: 3px;
+  display: flex;
+  gap: 10px;
+}
+.deck-stats .due { color: var(--green); font-weight: 600; }
+.deck-stats .new { color: var(--accent); font-weight: 600; }
+
+.deck-delete {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.deck-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (hover: hover) {
+  .deck-item:hover { background: var(--bg-elevated); }
+  .deck-delete:hover { color: var(--red); }
+}
+
+/* --- Десктоп: колоди плиткою, кнопки в рядок ----------------------- */
+@media (min-width: 900px) {
+  .deck-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+  .deck-actions { flex-direction: row; margin-top: 24px; }
+  .deck-actions .btn { flex: 1; }
+}
+
+@media (min-width: 1400px) {
+  .deck-list { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+}

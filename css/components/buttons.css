@@ -1,0 +1,62 @@
+/* =====================================================================
+   КНОПКИ — базова .btn, різновиди за роллю та ряд кнопок оцінки.
+   ===================================================================== */
+
+.btn {
+  border: none;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+  background: var(--bg-elevated);
+  transition: transform 0.08s ease, opacity 0.15s;
+  touch-action: manipulation; /* прибирає затримку 300ms і зум по подвійному тапу */
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; }
+
+.btn-primary { background: var(--accent); color: #14151f; }
+.btn-secondary { background: var(--bg-elevated); color: var(--text); }
+.btn-wide { width: 100%; }
+
+@media (hover: hover) {
+  .btn:not(:disabled):hover { filter: brightness(1.1); }
+}
+
+/* --- Ряд кнопок оцінки ---------------------------------------------
+   Чотири в звичайному навчанні («Знову / Важко / Добре / Легко»),
+   дві в адаптивному режимі (.two — «Не знаю / Знаю»).
+   -------------------------------------------------------------------- */
+.answer-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.answer-buttons .btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 4px;
+  font-size: 0.9rem;
+}
+/* Підпис інтервалу під назвою кнопки («3 д», «1.2 міс») */
+.answer-buttons small { font-size: 0.7rem; opacity: 0.75; font-weight: 400; }
+
+.answer-buttons.two { grid-template-columns: 1fr 1fr; }
+.answer-buttons.two .btn { font-size: 1rem; padding: 16px 8px; }
+
+/* Кольори збігаються з семантикою результату: червоний — забув,
+   зелений — знає. Ті самі змінні використовує підсвічування вправ. */
+.btn-again { background: var(--red); color: #14151f; }
+.btn-hard  { background: var(--orange); color: #14151f; }
+.btn-good  { background: var(--green); color: #14151f; }
+.btn-easy  { background: var(--teal); color: #14151f; }
+
+/* --- Десктоп: не розтягуємо ряд на всю ширину ----------------------- */
+@media (min-width: 900px) {
+  .answer-buttons { max-width: 640px; margin-inline: auto; }
+  .answer-buttons .btn { padding: 14px 8px; }
+}

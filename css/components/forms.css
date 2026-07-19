@@ -1,0 +1,40 @@
+/* =====================================================================
+   ФОРМИ — поля вводу, списки, повзунки та їхні підписи.
+   Розмітка скрізь однакова:
+     <label class="field"><span>Підпис</span><input …></label>
+   ===================================================================== */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.field > span {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+/* Два поля в рядок (напр. «Мова вивчення» + «Рівень») */
+.field-row { display: flex; gap: 12px; }
+.field-row .field { flex: 1; }
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-elevated);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+  width: 100%;
+  outline: none;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+
+input[type="range"] { width: 100%; accent-color: var(--accent); }

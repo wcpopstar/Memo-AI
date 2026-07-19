@@ -1,0 +1,50 @@
+/* =====================================================================
+   ЕКРАН «НАВЧАННЯ» — картка з питанням/відповіддю.
+   Клас .study-card перевикористовує й адаптивний AI-режим (ai.css).
+   ===================================================================== */
+
+.study-content {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 140px); /* картка тягнеться, кнопки — знизу */
+}
+
+.study-card {
+  flex: 1;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  overflow-y: auto;
+  word-break: break-word; /* довге слово не рве розкладку */
+}
+
+.card-side { font-size: 1.35rem; line-height: 1.45; text-align: center; }
+
+/* Зворотний бік відділяємо лінією та кольором */
+#card-back {
+  border-top: 1px solid var(--bg-elevated);
+  padding-top: 16px;
+  color: var(--teal);
+}
+
+/* --- Десктоп -------------------------------------------------------- */
+@media (min-width: 900px) {
+  .study-content { min-height: calc(100dvh - 150px); }
+  .study-card { padding: 40px 32px; }
+  .card-side { font-size: 1.55rem; }
+
+  /* Кнопка «Показати відповідь» не на всю ширину екрана */
+  #btn-show-answer { display: block; max-width: 640px; margin-inline: auto; }
+}
+
+/* --- Телефон боком: картка не має з'їдати весь екран ---------------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  .study-content { min-height: auto; }
+  .study-card { padding: 16px; }
+  .card-side { font-size: 1.1rem; }
+}

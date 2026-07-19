@@ -1,0 +1,96 @@
+/* =====================================================================
+   НАВІГАЦІЯ — один і той самий <nav class="bottom-nav">:
+     • мобільний  — панель із чотирьох іконок унизу екрана;
+     • десктоп    — бічна панель (sidebar) із заголовком і підписами.
+
+   Розмітка не змінюється, лише стилі — тому JS нічого не знає про
+   те, яка зараз навігація, і немає дублювання кнопок.
+   ===================================================================== */
+
+/* --- Мобільний: панель унизу ---------------------------------------- */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--content-max);
+  height: var(--nav-height);
+  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  backdrop-filter: blur(12px);
+  display: flex;
+  border-top: 1px solid var(--bg-elevated);
+  padding-bottom: env(safe-area-inset-bottom); /* «чубчик» / жестова смуга */
+  z-index: 20;
+}
+
+.nav-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+}
+.nav-btn span { font-size: 1.35rem; }  /* емодзі-іконка */
+.nav-btn i { font-style: normal; }     /* підпис (перекладається через i18n) */
+.nav-btn.active { color: var(--accent); }
+
+/* Заголовок бічної панелі — на мобільному не потрібен */
+.nav-brand { display: none; }
+
+@media (hover: hover) {
+  .nav-btn:hover { color: var(--text); }
+}
+
+/* --- Десктоп: та сама панель, але збоку ----------------------------- */
+@media (min-width: 900px) {
+  .bottom-nav {
+    top: 0;
+    bottom: auto;
+    left: 0;
+    transform: none;
+    width: var(--sidebar);
+    max-width: none;
+    height: 100dvh;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 22px 14px;
+    border-top: none;
+    border-right: 1px solid var(--bg-elevated);
+    background: var(--bg-card);
+  }
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 22px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .nav-brand span { font-size: 1.4rem; }
+  .nav-brand i { font-style: normal; }
+
+  /* Іконка та підпис в один рядок */
+  .nav-btn {
+    flex: 0 0 auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-btn span { font-size: 1.2rem; }
+  .nav-btn.active { background: var(--bg-elevated); }
+}

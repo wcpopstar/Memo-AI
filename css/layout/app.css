@@ -1,0 +1,110 @@
+/* =====================================================================
+   КАРКАС СТОРІНКИ — контейнер застосунку, екрани, шапка, область
+   контенту, порожній стан. Усе, що формує «раму» навколо вмісту.
+   ===================================================================== */
+
+#app {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* --- Екрани --------------------------------------------------------- */
+/* Одночасно видно рівно один екран; перемикає JS через .active */
+.screen {
+  display: none;
+  padding-bottom: calc(var(--nav-height) + 16px); /* місце під нижню навігацію */
+}
+.screen.active { display: block; }
+
+/* --- Шапка екрана --------------------------------------------------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 16px 12px;
+  position: sticky;
+  top: 0;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+.topbar h1 { font-size: 1.25rem; font-weight: 700; flex: 1; }
+
+.btn-back {
+  background: var(--bg-elevated);
+  border: none;
+  color: var(--text);
+  font-size: 1.2rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Лічильник карток у правому куті шапки */
+.counter { font-size: 0.85rem; color: var(--text-dim); }
+
+/* --- Область контенту ----------------------------------------------- */
+.content { padding: 8px 16px 24px; }
+
+/* --- Порожній стан («немає колод», «на сьогодні все») --------------- */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.empty-icon { font-size: 3rem; }
+
+@media (hover: hover) {
+  .btn-back:hover { background: var(--accent); color: #14151f; }
+}
+
+/* --- Планшет: ширші відступи --------------------------------------- */
+@media (min-width: 600px) {
+  .topbar { padding: 22px 24px 14px; }
+  .content { padding: 8px 24px 32px; }
+}
+
+/* --- Десктоп: контент поруч із бічною панеллю ----------------------- */
+@media (min-width: 900px) {
+  #app {
+    max-width: none;
+    margin: 0;
+    padding-left: var(--sidebar);
+  }
+
+  /* Знизу вже нічого не перекриває контент */
+  .screen { padding-bottom: 40px; }
+
+  /* Не розтягуємо текст на весь монітор — довгі рядки погано читаються */
+  .topbar, .content { max-width: 860px; margin-inline: auto; }
+  .topbar { padding: 30px 32px 16px; }
+  .content { padding: 8px 32px 40px; }
+  .topbar h1 { font-size: 1.6rem; }
+
+  /* Екрани-форми ще вужчі: поле вводу на 1000px виглядає безглуздо */
+  #screen-add .topbar,    #screen-add .content,
+  #screen-settings .topbar, #screen-settings .content,
+  #screen-ai .topbar,     #screen-ai .content { max-width: 640px; }
+
+  .empty-state { padding: 64px 24px; }
+}
+
+/* --- Широкий монітор ------------------------------------------------ */
+@media (min-width: 1400px) {
+  .topbar, .content { max-width: 1000px; }
+  #screen-add .topbar,      #screen-add .content,
+  #screen-settings .topbar, #screen-settings .content,
+  #screen-ai .topbar,       #screen-ai .content { max-width: 680px; }
+}
+
+/* --- Телефон боком: економимо вертикальний простір ----------------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  .empty-state { padding: 24px; }
+}

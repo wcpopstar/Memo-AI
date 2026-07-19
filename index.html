@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <!-- user-scalable=no прибрано: на десктопі та для слабкозорих масштабування
+       сторінки має працювати. Подвійний тап на мобільному не «стрибає»
+       завдяки touch-action у стилях кнопок. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1a1b26">
+  <title>Мемо — картки для запам'ятовування</title>
+  <!-- CSS розбитий на модулі; порядок важливий — далі в списку файл,
+       вищий його пріоритет у каскаді:
+         base    → токени й скидання стилів
+         layout  → каркас сторінки та навігація
+         components → елементи, що повторюються скрізь
+         screens → стилі конкретних екранів
+       ?v= — версія для скидання кешу браузера. Змінюйте після оновлень. -->
+  <link rel="stylesheet" href="css/base/variables.css?v=6">
+  <link rel="stylesheet" href="css/base/reset.css?v=6">
+  <link rel="stylesheet" href="css/layout/app.css?v=6">
+  <link rel="stylesheet" href="css/layout/sidebar.css?v=6">
+  <link rel="stylesheet" href="css/components/buttons.css?v=6">
+  <link rel="stylesheet" href="css/components/forms.css?v=6">
+  <link rel="stylesheet" href="css/components/modal.css?v=6">
+  <link rel="stylesheet" href="css/components/toast.css?v=6">
+  <link rel="stylesheet" href="css/screens/decks.css?v=6">
+  <link rel="stylesheet" href="css/screens/study.css?v=6">
+  <link rel="stylesheet" href="css/screens/ai.css?v=6">
+  <link rel="stylesheet" href="css/screens/exercise.css?v=6">
+</head>
+<body>
+  <div id="app">
+
+    <!-- Екран: Колоди -->
+    <section id="screen-decks" class="screen active">
+      <header class="topbar">
+        <h1 data-i18n="decks.title">📚 Мої колоди</h1>
+      </header>
+      <div class="content">
+        <div id="deck-list" class="deck-list"></div>
+        <div id="decks-empty" class="empty-state hidden">
+          <div class="empty-icon">🗂️</div>
+          <p data-i18n-html="decks.empty"></p>
+        </div>
+        <div class="deck-actions">
+          <button id="btn-new-deck" class="btn btn-primary" data-i18n="decks.new">＋ Нова колода</button>
+          <button id="btn-import" class="btn btn-secondary" data-i18n="decks.import">📥 Імпорт з Anki</button>
+          <input type="file" id="file-apkg" accept=".apkg,.colpkg" hidden>
+        </div>
+      </div>
+    </section>
+
+    <!-- Екран: Навчання -->
+    <section id="screen-study" class="screen">
+      <header class="topbar">
+        <button class="btn-back" data-back="screen-decks">←</button>
+        <h1 id="study-deck-name" data-i18n="study.title">Навчання</h1>
+        <span id="study-counter" class="counter"></span>
+      </header>
+      <div class="content study-content">
+        <div id="study-card" class="study-card">
+          <div id="card-front" class="card-side"></div>
+          <div id="card-back" class="card-side hidden"></div>
+        </div>
+        <div id="study-controls">
+          <button id="btn-show-answer" class="btn btn-primary btn-wide" data-i18n="study.show">Показати відповідь</button>
+          <div id="answer-buttons" class="answer-buttons hidden">
+            <button class="btn btn-again" data-grade="0"><span data-i18n="study.again">Знову</span><small id="ivl-again"></small></button>
+            <button class="btn btn-hard" data-grade="1"><span data-i18n="study.hard">Важко</span><small id="ivl-hard"></small></button>
+            <button class="btn btn-good" data-grade="2"><span data-i18n="study.good">Добре</span><small id="ivl-good"></small></button>
+            <button class="btn btn-easy" data-grade="3"><span data-i18n="study.easy">Легко</span><small id="ivl-easy"></small></button>
+          </div>
+        </div>
+        <div id="study-done" class="empty-state hidden">
+          <div class="empty-icon">🎉</div>
+          <p data-i18n="study.done">Вітаємо! На сьогодні все.</p>
+          <button class="btn btn-primary" data-back="screen-decks" data-i18n="study.toDecks">До колод</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Екран: Додати картку -->
+    <section id="screen-add" class="screen">
+      <header class="topbar"><h1 data-i18n="add.title">✏️ Нова картка</h1></header>
+      <div class="content">
+        <label class="field">
+          <span data-i18n="add.deck">Колода</span>
+          <select id="add-deck-select"></select>
+        </label>
+        <label class="field">
+          <span data-i18n="add.front">Передня сторона</span>
+          <textarea id="add-front" rows="3" data-i18n-placeholder="add.frontPh"></textarea>
+        </label>
+        <label class="field">
+          <span data-i18n="add.back">Зворотна сторона</span>
+          <textarea id="add-back" rows="3" data-i18n-placeholder="add.backPh"></textarea>
+        </label>
+        <button id="btn-add-card" class="btn btn-primary btn-wide" data-i18n="add.submit">Додати картку</button>
+      </div>
+    </section>
+
+    <!-- Екран: AI -->
+    <section id="screen-ai" class="screen">
+      <header class="topbar">
+        <h1 id="ai-title" data-i18n="ai.titleAdaptive">🧠 Адаптивний режим</h1>
+        <span id="ai-session-counter" class="counter"></span>
+      </header>
+      <div class="content">
+        <div id="ai-no-key" class="notice hidden" data-i18n-html="ai.noKey"></div>
+
+        <!-- Підрежим: адаптивне навчання -->
+        <div id="ai-adaptive">
+          <div id="adaptive-setup">
+            <p class="hint" style="margin-bottom:16px" data-i18n="ai.hint"></p>
+            <label class="field">
+              <span data-i18n="ai.studyLang">Мова вивчення</span>
+              <select id="adaptive-lang"></select>
+            </label>
+            <label class="field">
+              <span data-i18n="ai.topic">Тема</span>
+              <input id="adaptive-topic" type="text" data-i18n-placeholder="ai.topicPh">
+            </label>
+            <div id="adaptive-profile" class="profile-box hidden"></div>
+            <button id="btn-adaptive-start" class="btn btn-primary btn-wide" data-i18n="ai.start">▶️ Почати сесію</button>
+            <button id="btn-adaptive-reset" class="btn btn-secondary btn-wide hidden" style="margin-top:10px" data-i18n="ai.reset">
+              🗑️ Скинути прогрес цієї мови
+            </button>
+            <p class="hint" style="margin-top:18px">
+              <a href="#" id="link-generator" data-i18n="ai.toGenerator"></a>
+            </p>
+          </div>
+
+          <div id="adaptive-session" class="hidden">
+            <div id="adaptive-card" class="study-card">
+              <div id="adaptive-level" class="level-badge"></div>
+              <div id="adaptive-task" class="task-prompt hidden"></div>
+              <div id="adaptive-word" class="card-side"></div>
+              <div id="adaptive-answer" class="card-side hidden"></div>
+              <div id="adaptive-feedback" class="feedback hidden"></div>
+            </div>
+
+            <!-- Вправа: згадати переклад -->
+            <div id="mode-classic">
+              <button id="btn-adaptive-reveal" class="btn btn-primary btn-wide" data-i18n="ai.reveal">Показати відповідь</button>
+              <div id="adaptive-buttons" class="answer-buttons two hidden">
+                <button class="btn btn-again" data-knows="0" data-i18n="ai.dontKnow">❌ Не знаю</button>
+                <button class="btn btn-good" data-knows="1" data-i18n="ai.know">✅ Знаю</button>
+              </div>
+            </div>
+
+            <!-- Вправа: написати слово по буквах -->
+            <div id="mode-spell" class="hidden">
+              <input id="spell-input" type="text" data-i18n-placeholder="spell.placeholder"
+                     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <div class="answer-buttons two" style="margin-top:10px">
+                <button id="btn-spell-idk" class="btn btn-secondary" data-i18n="spell.idk">Не знаю</button>
+                <button id="btn-spell-check" class="btn btn-primary" data-i18n="spell.check">Перевірити</button>
+              </div>
+            </div>
+
+            <!-- Вправа: продиктувати слово -->
+            <div id="mode-speak" class="hidden">
+              <button id="btn-speak" class="btn btn-primary btn-wide" data-i18n="speak.start">🎤 Говорити</button>
+              <button id="btn-speak-skip" class="btn btn-secondary btn-wide" style="margin-top:10px" data-i18n="speak.skip">Пропустити</button>
+            </div>
+
+            <button id="btn-adaptive-next" class="btn btn-primary btn-wide hidden" data-i18n="spell.next">Далі</button>
+          </div>
+
+          <div id="adaptive-done" class="empty-state hidden">
+            <div class="empty-icon">🎯</div>
+            <div id="adaptive-summary"></div>
+            <button id="btn-adaptive-again" class="btn btn-primary" data-i18n="ai.continue">Продовжити</button>
+            <button class="btn btn-secondary" id="btn-adaptive-exit" data-i18n="ai.finish">Завершити</button>
+          </div>
+        </div>
+
+        <!-- Підрежим: генератор карток у колоду -->
+        <div id="ai-generator" class="hidden">
+        <label class="field">
+          <span data-i18n="add.deck">Колода</span>
+          <select id="ai-deck-select"></select>
+        </label>
+        <label class="field">
+          <span data-i18n="gen.topic">Тема</span>
+          <input id="ai-topic" type="text" data-i18n-placeholder="gen.topicPh">
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span data-i18n="ai.studyLang">Мова вивчення</span>
+            <select id="ai-lang"></select>
+          </label>
+          <label class="field">
+            <span data-i18n="gen.level">Рівень</span>
+            <select id="ai-level">
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="B1" selected>B1</option>
+              <option value="B2">B2</option>
+              <option value="C1">C1</option>
+            </select>
+          </label>
+        </div>
+        <label class="field">
+          <span><span data-i18n="gen.count">Кількість карток: </span><b id="ai-count-label">10</b></span>
+          <input id="ai-count" type="range" min="5" max="30" step="5" value="10">
+        </label>
+        <button id="btn-ai-generate" class="btn btn-primary btn-wide" data-i18n="gen.generate">✨ Згенерувати картки</button>
+        <p class="hint" style="margin-top:14px">
+          <a href="#" id="link-adaptive" data-i18n="ai.toAdaptive"></a>
+        </p>
+        <div id="ai-status" class="ai-status hidden"></div>
+        <div id="ai-preview" class="ai-preview"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Екран: Налаштування -->
+    <section id="screen-settings" class="screen">
+      <header class="topbar"><h1 data-i18n="settings.title">⚙️ Налаштування</h1></header>
+      <div class="content">
+        <label class="field">
+          <span data-i18n="settings.uiLang">Мова інтерфейсу</span>
+          <select id="settings-ui-lang"></select>
+        </label>
+        <hr>
+        <label class="field">
+          <span data-i18n="settings.provider">Провайдер AI</span>
+          <select id="settings-provider">
+            <option value="gemini" data-i18n="settings.providerGemini"></option>
+            <option value="groq" data-i18n="settings.providerGroq"></option>
+            <option value="anthropic" data-i18n="settings.providerAnthropic"></option>
+          </select>
+        </label>
+        <label class="field hidden" id="field-gemini-key">
+          <span data-i18n="settings.geminiKey">API-ключ Google Gemini</span>
+          <input id="settings-gemini-key" type="password" placeholder="AIza…">
+          <small class="hint" data-i18n="settings.geminiHint"></small>
+        </label>
+        <label class="field" id="field-groq-key">
+          <span data-i18n="settings.groqKey">API-ключ Groq</span>
+          <input id="settings-groq-key" type="password" placeholder="gsk_…">
+          <small class="hint" data-i18n="settings.groqHint"></small>
+        </label>
+        <label class="field hidden" id="field-anthropic-key">
+          <span data-i18n="settings.anthropicKey">API-ключ Anthropic</span>
+          <input id="settings-api-key" type="password" placeholder="sk-ant-…">
+          <small class="hint" data-i18n="settings.anthropicHint"></small>
+        </label>
+        <button id="btn-save-settings" class="btn btn-primary btn-wide" data-i18n="settings.save">Зберегти</button>
+        <hr>
+        <label class="field">
+          <span data-i18n="settings.newLimit">Ліміт нових карток на день</span>
+          <input id="settings-new-limit" type="number" min="1" max="100" value="20">
+        </label>
+        <p class="hint" data-i18n="settings.footer"></p>
+      </div>
+    </section>
+
+    <!-- Нижня навігація -->
+    <nav class="bottom-nav">
+      <!-- Заголовок бічної панелі — видно лише на широких екранах -->
+      <div class="nav-brand"><span>🧠</span><i data-i18n="app.brand">Мемо</i></div>
+      <button class="nav-btn active" data-screen="screen-decks"><span>📚</span><i data-i18n="nav.decks"></i></button>
+      <button class="nav-btn" data-screen="screen-add"><span>✏️</span><i data-i18n="nav.add"></i></button>
+      <button class="nav-btn" data-screen="screen-ai"><span>🤖</span><i data-i18n="nav.ai"></i></button>
+      <button class="nav-btn" data-screen="screen-settings"><span>⚙️</span><i data-i18n="nav.more"></i></button>
+    </nav>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Модальне вікно (заміна prompt/confirm — вони блокуються в мобільних браузерах) -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+      <div class="modal">
+        <h2 id="modal-title"></h2>
+        <input id="modal-input" type="text" class="hidden">
+        <div class="modal-actions">
+          <button id="modal-cancel" class="btn btn-secondary" data-i18n="modal.cancel">Скасувати</button>
+          <button id="modal-ok" class="btn btn-primary">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- integrity — захист від підміни коду на CDN: браузер відхилить файл,
+       якщо його вміст змінився (інакше чужий скрипт отримав би доступ
+       до вашого API-ключа в localStorage). -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+          integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sql.js@1.10.2/dist/sql-wasm.js"
+          integrity="sha384-/2HxK3kObxd3+ww+DG94zYpLU1yodAI1+vAauuriYyEXkQ+zBvXYvJPL9Ey87/lN"
+          crossorigin="anonymous"></script>
+  <script type="module" src="js/app.js?v=4"></script>
+</body>
+</html>

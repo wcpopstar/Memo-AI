@@ -1,0 +1,40 @@
+/* =====================================================================
+   БАЗА — скидання браузерних стилів, глобальна типографіка,
+   утиліти та стани, спільні для всього застосунку.
+   ===================================================================== */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a { color: var(--accent); text-decoration: none; }
+
+hr { border: none; border-top: 1px solid var(--bg-elevated); margin: 20px 0; }
+
+/* Дрібний пояснювальний текст під полями та в підказках */
+.hint { color: var(--text-dim); font-size: 0.8rem; line-height: 1.4; }
+
+/* Приховування елементів з JS. !important — щоб перебивати
+   display, який компонент міг задати собі в медіазапиті. */
+.hidden { display: none !important; }
+
+/* --- Стани ---------------------------------------------------------- */
+
+/* Видима рамка фокуса для навігації з клавіатури (десктоп) */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Наведення мишею — лише там, де є справжній курсор.
+   На тач-екранах :hover «залипає» після дотику, тому (hover: hover). */
+@media (hover: hover) {
+  a:hover { text-decoration: underline; }
+}

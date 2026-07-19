@@ -1,0 +1,110 @@
+/* =====================================================================
+   ЕКРАН «AI» — два підрежими:
+     • адаптивне навчання (профіль рівня, сесія зі словами);
+     • генератор карток у звичайну колоду.
+   Стилі самих вправ (написати / продиктувати) — в exercise.css.
+   ===================================================================== */
+
+/* --- Попередження «додайте API-ключ» -------------------------------- */
+.notice {
+  background: color-mix(in srgb, var(--orange) 15%, var(--bg-card));
+  border: 1px solid var(--orange);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+.notice a { color: var(--accent); }
+
+/* --- Генератор карток ----------------------------------------------- */
+.ai-status {
+  text-align: center;
+  padding: 14px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.ai-status.error { color: var(--red); }
+
+.ai-preview { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.ai-card {
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.92rem;
+}
+.ai-card b { color: var(--accent); }          /* слово */
+.ai-card .tr { color: var(--teal); }          /* переклад */
+.ai-card .ex {                                 /* приклад вживання */
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* --- Профіль учня (рівень, точність, засвоєні слова) ---------------- */
+.profile-box {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+.profile-box .row { display: flex; justify-content: space-between; gap: 12px; }
+.profile-box .row span:last-child { color: var(--text-dim); }
+.profile-box .lvl { color: var(--accent); font-weight: 700; font-size: 1.05rem; }
+
+/* --- Сесія адаптивного режиму --------------------------------------- */
+/* Значок рівня слова (A1…C1) угорі картки */
+.level-badge {
+  align-self: center;
+  background: var(--bg-elevated);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+
+#adaptive-session .study-card { min-height: 46dvh; margin-bottom: 14px; }
+
+#adaptive-answer {
+  border-top: 1px solid var(--bg-elevated);
+  padding-top: 16px;
+  color: var(--teal);
+}
+#adaptive-answer .ex {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.92rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+#adaptive-summary { line-height: 1.7; }
+
+/* --- Десктоп -------------------------------------------------------- */
+@media (min-width: 900px) {
+  #adaptive-session .study-card { min-height: 320px; }
+
+  /* Керування сесією тримаємо в колонці такої ж ширини, як кнопки оцінки */
+  #btn-adaptive-reveal,
+  #btn-adaptive-next { display: block; }
+  #btn-adaptive-reveal,
+  #btn-adaptive-next,
+  #mode-spell,
+  #mode-speak { max-width: 640px; margin-inline: auto; }
+
+  /* Згенеровані картки — у дві колонки */
+  .ai-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+  }
+}
+
+/* --- Телефон боком --------------------------------------------------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  #adaptive-session .study-card { min-height: auto; }
+}
