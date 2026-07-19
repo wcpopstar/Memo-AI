@@ -15,18 +15,18 @@
          components → елементи, що повторюються скрізь
          screens → стилі конкретних екранів
        ?v= — версія для скидання кешу браузера. Змінюйте після оновлень. -->
-  <link rel="stylesheet" href="css/base/variables.css?v=6">
-  <link rel="stylesheet" href="css/base/reset.css?v=6">
-  <link rel="stylesheet" href="css/layout/app.css?v=6">
-  <link rel="stylesheet" href="css/layout/sidebar.css?v=6">
-  <link rel="stylesheet" href="css/components/buttons.css?v=6">
-  <link rel="stylesheet" href="css/components/forms.css?v=6">
-  <link rel="stylesheet" href="css/components/modal.css?v=6">
-  <link rel="stylesheet" href="css/components/toast.css?v=6">
-  <link rel="stylesheet" href="css/screens/decks.css?v=6">
-  <link rel="stylesheet" href="css/screens/study.css?v=6">
-  <link rel="stylesheet" href="css/screens/ai.css?v=6">
-  <link rel="stylesheet" href="css/screens/exercise.css?v=6">
+  <link rel="stylesheet" href="css/base/variables.css?v=7">
+  <link rel="stylesheet" href="css/base/reset.css?v=7">
+  <link rel="stylesheet" href="css/layout/app.css?v=7">
+  <link rel="stylesheet" href="css/layout/sidebar.css?v=7">
+  <link rel="stylesheet" href="css/components/buttons.css?v=7">
+  <link rel="stylesheet" href="css/components/forms.css?v=7">
+  <link rel="stylesheet" href="css/components/modal.css?v=7">
+  <link rel="stylesheet" href="css/components/toast.css?v=7">
+  <link rel="stylesheet" href="css/screens/decks.css?v=7">
+  <link rel="stylesheet" href="css/screens/study.css?v=7">
+  <link rel="stylesheet" href="css/screens/ai.css?v=7">
+  <link rel="stylesheet" href="css/screens/exercise.css?v=7">
 </head>
 <body>
   <div id="app">
@@ -115,6 +115,14 @@
             <label class="field">
               <span data-i18n="ai.studyLang">Мова вивчення</span>
               <select id="adaptive-lang"></select>
+            </label>
+            <label class="field hidden" id="field-word-source">
+              <span data-i18n="ai.source">Звідки брати слова</span>
+              <select id="adaptive-source">
+                <option value="bank" data-i18n="ai.sourceBank"></option>
+                <option value="ai" data-i18n="ai.sourceAi"></option>
+              </select>
+              <small class="hint" data-i18n="ai.sourceHint"></small>
             </label>
             <label class="field">
               <span data-i18n="ai.topic">Тема</span>
@@ -254,6 +262,7 @@
           <input id="settings-new-limit" type="number" min="1" max="100" value="20">
         </label>
         <p class="hint" data-i18n="settings.footer"></p>
+        <p class="hint" data-i18n="settings.credits" style="margin-top:10px"></p>
       </div>
     </section>
 
@@ -291,6 +300,6 @@
   <script src="https://cdn.jsdelivr.net/npm/sql.js@1.10.2/dist/sql-wasm.js"
           integrity="sha384-/2HxK3kObxd3+ww+DG94zYpLU1yodAI1+vAauuriYyEXkQ+zBvXYvJPL9Ey87/lN"
           crossorigin="anonymous"></script>
-  <script type="module" src="js/app.js?v=4"></script>
+  <script type="module" src="js/app.js?v=7"></script>
 </body>
 </html>

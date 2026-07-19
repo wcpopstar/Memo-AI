@@ -1,18 +1,19 @@
 // ?v= — версія для скидання кешу браузера.
 // ВАЖЛИВО: змінюйте це число в index.html І в усіх імпортах нижче
 // після кожного оновлення коду, інакше браузер підтягне старі модулі.
-import * as db from './db.js?v=4';
-import { schedule, previewInterval } from './srs.js?v=4';
-import { parseApkg } from './apkg.js?v=4';
-import { generateCards, generateAdaptiveBatch } from './ai.js?v=4';
-import { gradeWord, estimateLevel, profileStats, buildQueue, neededNewWords } from './adaptive.js?v=4';
-import { SHARED_GROQ_KEY, SHARED_GEMINI_KEY } from './config.js?v=4';
-import { t, applyI18n, getLang, setLang, getSavedLang, UI_LANGS, UI_LANG_IN_ENGLISH } from './i18n.js?v=4';
-import { STUDY_LANGS, getStudyLang, LEGACY_LANG_NAMES } from './langs.js?v=4';
+import * as db from './db.js?v=7';
+import { schedule, previewInterval } from './srs.js?v=7';
+import { parseApkg } from './apkg.js?v=7';
+import { generateCards, generateAdaptiveBatch } from './ai.js?v=7';
+import { gradeWord, estimateLevel, profileStats, buildQueue, neededNewWords } from './adaptive.js?v=7';
+import { SHARED_GROQ_KEY, SHARED_GEMINI_KEY } from './config.js?v=7';
+import { t, applyI18n, getLang, setLang, getSavedLang, UI_LANGS, UI_LANG_IN_ENGLISH } from './i18n.js?v=7';
+import { STUDY_LANGS, getStudyLang, LEGACY_LANG_NAMES } from './langs.js?v=7';
+import { hasWordbank, loadWordbank, pickWords } from './wordbank.js?v=7';
 import {
   RESULT, checkAnswer, pickMode,
   speechAvailable, listenOnce, bestSpeechResult,
-} from './exercise.js?v=4';
+} from './exercise.js?v=7';
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
@@ -87,7 +88,6 @@ function showScreen(id) {
   if (id === 'screen-decks') renderDecks();
   if (id === 'screen-add' || id === 'screen-ai') fillDeckSelects();
   if (id === 'screen-ai') {
-    $('#ai-no-key').classList.toggle('hidden', !!settings.activeKey);
     renderAdaptiveProfile();
   }
 }
@@ -381,7 +381,25 @@ function fillLangSelects() {
   }
 }
 
+// Селект «звідки брати слова» — ховаємо для мов без словника
+function renderSourceField() {
+  const lang = adaptiveLang();
+  const field = $('#field-word-source');
+  const sel = $('#adaptive-source');
+  field.classList.toggle('hidden', !hasWordbank(lang));
+  sel.value = wordSource(lang);
+  // Попередження про ключ потрібне лише в режимі AI
+  $('#ai-no-key').classList.toggle(
+    'hidden', wordSource(lang) !== 'ai' || !!settings.activeKey);
+}
+
+$('#adaptive-source').addEventListener('change', (e) => {
+  localStorage.setItem(sourceKey(adaptiveLang()), e.target.value);
+  renderSourceField();
+});
+
 async function renderAdaptiveProfile() {
+  renderSourceField();
   const lang = adaptiveLang();
   const words = await db.getAiWords(lang);
   const box = $('#adaptive-profile');
@@ -431,10 +449,34 @@ function showAdaptiveView(view) {
   if (view !== 'session') $('#ai-session-counter').textContent = '';
 }
 
+// Джерело слів: вбудований словник чи AI.
+// Словник доступний не для всіх мов, тому вибір може бути примусовим.
+const sourceKey = (lang) => `memo-source-${lang}`;
+function wordSource(lang) {
+  if (!hasWordbank(lang)) return 'ai';
+  return localStorage.getItem(sourceKey(lang)) || 'bank';
+}
+
+// Довантаження нових слів зі словника
+async function fetchFromWordbank(lang, words, need) {
+  const bank = await loadWordbank(lang);
+  const fresh = pickWords(bank, {
+    level: getLevel(lang),
+    count: Math.max(need, 12),
+    exclude: new Set(words.map(w => w.word.toLowerCase())),
+    uiLang: getLang(),
+  });
+  if (!fresh.length) return words;        // словник вичерпано
+  await db.addAiWords(fresh.map(c => db.newAiWord(lang, c)));
+  return db.getAiWords(lang);
+}
+
 // Довантаження нових слів від AI, якщо чергу вичерпано
 async function fetchAdaptiveWords(lang, words) {
   const need = neededNewWords(words);
   if (!need) return words;
+
+  if (wordSource(lang) === 'bank') return fetchFromWordbank(lang, words, need);
 
   const meta = getStudyLang(lang);
   const level = getLevel(lang);
@@ -465,8 +507,12 @@ async function fetchAdaptiveWords(lang, words) {
 }
 
 async function startAdaptive() {
-  if (!settings.activeKey) { showScreen('screen-settings'); return toast(t('ai.needKey')); }
   const lang = adaptiveLang();
+  // Ключ потрібен лише коли слова беруться від AI
+  if (wordSource(lang) === 'ai' && !settings.activeKey) {
+    showScreen('screen-settings');
+    return toast(t('ai.needKey'));
+  }
   const btn = $('#btn-adaptive-start');
   btn.disabled = true;
   btn.textContent = t('ai.preparing');
